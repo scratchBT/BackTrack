@@ -5,9 +5,10 @@ import { fetchTopTenTracks } from '../features/topTenTracksSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 
 const SongList = () => {
-  const [maxWidth, setMaxWidth] = useState(0);
+  // const [maxWidth, setMaxWidth] = useState(0);
 
   const [audio, setAudio] = useState(null);
+  const [isClickedId, setIsClickedId] = useState(null);
   const [endClipTimeout, setEndClipTimeout] = useState(null);
 
   const dispatch = useDispatch();
@@ -24,21 +25,21 @@ const SongList = () => {
     }
   }, [dispatch, status]);
 
-  useEffect(() => {
-      setMaxWidth(setMaxDivWidth());
-  }, [tracks]);
+  // useEffect(() => {
+  //     setMaxWidth(setMaxDivWidth());
+  // }, [tracks]);
 
-  const setMaxDivWidth = () =>{
-    let maxWidth = 0;
-    const divs = document.querySelectorAll('.tracks');
-    divs.forEach(div => {
-      const width = div.offsetWidth;
-      if (width > maxWidth) maxWidth = width;
-    });
-    return maxWidth
-  }
+  // const setMaxDivWidth = () =>{
+  //   let maxWidth = 0;
+  //   const divs = document.querySelectorAll('.tracks');
+  //   divs.forEach(div => {
+  //     const width = div.offsetWidth;
+  //     if (width > maxWidth) maxWidth = width;
+  //   });
+  //   return maxWidth
+  // }
 
-  const controlAudio = (previewUrl) => {
+  const controlAudio = (previewUrl, trackId) => {
 
     // For now, in the cases when the previewUrl is null as it sometimes is. 2024-01-12_05-10-PM PST.
     if (!previewUrl) return;
@@ -60,6 +61,7 @@ const SongList = () => {
       const newAudio = new Audio(previewUrl);
       newAudio.volume = 0.0;
       newAudio.play();
+      setIsClickedId(trackId);
 
       // Fade in audio
       fadeAudio(newAudio, 0.005, 125);
@@ -69,6 +71,7 @@ const SongList = () => {
         fadeAudio(newAudio, -0.005, 125, () => {
           newAudio.pause();
           newAudio.currentTime = 0;
+          setIsClickedId(null);
         });
       }, 28000);
 
@@ -92,23 +95,31 @@ const SongList = () => {
       playAudio();
     }
   }
-
+ 
   return (
     <div className="SongList">
       <h3>TOP 10 TRACKS</h3>
       <ul>
         {tracks.map(track => (
-        <li key={track.id}>
-          <div
-          className="tracks"
-          style={{
-            width: `${maxWidth}px`,
-            cursor: 'pointer'
-          }}
-          onClick={() => controlAudio(track.preview)}
-          >
-            {track.name} - {track.artist_name}
-            </div>
+          <li key={track.id}>
+            <div>
+                <span
+                className={isClickedId === track.id ? 'onPlay' : 'tracks'}
+                onClick={() => {
+                  controlAudio(track.preview, track.id)
+                }}
+                >
+                {track.name} - {track.artist_name}                      
+                </span>                               
+                <span
+                  className={isClickedId === track.id ? 'onPlay' : 'tracks'}
+                  onClick={() => {
+                    controlAudio(track.preview, track.id)
+                  }}
+                >
+                {track.name} - {track.artist_name}
+                </span>
+              </div>
             </li>
             ))}
       </ul>
