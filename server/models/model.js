@@ -59,14 +59,17 @@ const basicQueries = {
     return tracks;
   }),
   getTop10Artists: () => executeQuery(async (supabase) => supabase
-    .from('top10_artists')
+    .from('artists')
     .select('*')
+    .order('playtime_ms', { ascending: false })
+    .limit(10)
   ),
   getTop10Albums: () => executeQuery(async (supabase) => supabase
-    .from('top10_albums')
+    .from('albums')
     .select('*')
+    .order('playtime_ms', { ascending: false })
+    .limit(10)
   ),
-
   get10Sessions: () => executeQuery(async (supabase) => supabase.from('sessions').select('artist, track, album, country, dt_added, timefn').limit(10)),
   getFields: () => executeQuery(async (supabase) => supabase.from('sessions').select('*').limit(1)),
 };

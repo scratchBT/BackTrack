@@ -29868,7 +29868,7 @@ if (
 ) {
   __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());
 }
-
+        
   })();
 }
 
@@ -32693,7 +32693,7 @@ if (
 ) {
   __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());
 }
-
+        
   })();
 }
 
@@ -33352,7 +33352,7 @@ if (
 ) {
   __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());
 }
-
+        
   })();
 }
 
@@ -33541,7 +33541,7 @@ if (
 ) {
   __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(new Error());
 }
-
+        
   })();
 }
 
@@ -33641,12 +33641,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _assets_logo_png__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../assets/logo.png */ "./client/assets/logo.png");
 /* harmony import */ var _features_topTenTracksSlice_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../features/topTenTracksSlice.js */ "./client/src/features/topTenTracksSlice.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-redux */ "./client/node_modules/react-redux/dist/react-redux.mjs");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
 // import store from '../store/store.js';
 
 var SongList = function SongList() {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState2 = _slicedToArray(_useState, 2),
+    maxWidth = _useState2[0],
+    setMaxWidth = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState4 = _slicedToArray(_useState3, 2),
+    audio = _useState4[0],
+    setAudio = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState6 = _slicedToArray(_useState5, 2),
+    endClipTimeout = _useState6[0],
+    setEndClipTimeout = _useState6[1];
   var dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_3__.useDispatch)();
   var tracks = (0,react_redux__WEBPACK_IMPORTED_MODULE_3__.useSelector)(function (state) {
     return state.topTenTracks.tracks;
@@ -33660,16 +33678,84 @@ var SongList = function SongList() {
       dispatch((0,_features_topTenTracksSlice_js__WEBPACK_IMPORTED_MODULE_2__.fetchTopTenTracks)());
     }
   }, [dispatch, status]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    setMaxWidth(setMaxDivWidth());
+  }, [tracks]);
+  var setMaxDivWidth = function setMaxDivWidth() {
+    var maxWidth = 0;
+    var divs = document.querySelectorAll('.tracks');
+    divs.forEach(function (div) {
+      var width = div.offsetWidth;
+      if (width > maxWidth) maxWidth = width;
+    });
+    return maxWidth;
+  };
+  var controlAudio = function controlAudio(previewUrl) {
+    // For now, in the cases when the previewUrl is null as it sometimes is. 2024-01-12_05-10-PM PST.
+    if (!previewUrl) return;
 
-  // store.dispatch(topTenTracksSlice());
+    // function to fade the audio in or out
+    var fadeAudio = function fadeAudio(audio, increment, delay, callback) {
+      var fade = setInterval(function () {
+        if (increment > 0 && audio.volume < 0.07 || increment < 0 && audio.volume > 0.005) {
+          audio.volume += increment;
+        } else {
+          clearInterval(fade);
+          if (callback) callback();
+        }
+      }, delay);
+    };
+    var playAudio = function playAudio() {
+      var newAudio = new Audio(previewUrl);
+      newAudio.volume = 0.0;
+      newAudio.play();
 
-  // const tracks = useSelector(getTopTenTracks);
-  // const status = useSelector(getTopTenTracksStatus);
-  // const error = useSelector(getTopTenTracksError);
+      // Fade in audio
+      fadeAudio(newAudio, 0.005, 125);
 
+      // Start fading out after 28 seconds, as the clips are 30 seconds.
+      var endClipTimeout = setTimeout(function () {
+        fadeAudio(newAudio, -0.005, 125, function () {
+          newAudio.pause();
+          newAudio.currentTime = 0;
+        });
+      }, 28000);
+
+      // Save the new audio and endClipTimeout in state
+      setAudio(newAudio);
+      setEndClipTimeout(endClipTimeout);
+    };
+    // this will
+    if (audio) {
+      // Stop the fade out process if it hasn't started yet
+      clearTimeout(endClipTimeout);
+
+      // Fade out
+      fadeAudio(audio, -0.005, 250, function () {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+      setTimeout(playAudio, 1000); // 1 second delay
+    } else {
+      playAudio();
+    }
+  };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "SongList"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "TOP 10 TRACKS"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", null, "Sweet Home Alabama - Lyndyr Skynyrd")));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "TOP 10 TRACKS"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("ul", null, tracks.map(function (track) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("li", {
+      key: track.id
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "tracks",
+      style: {
+        width: "".concat(maxWidth, "px"),
+        cursor: 'pointer'
+      },
+      onClick: function onClick() {
+        return controlAudio(track.preview);
+      }
+    }, track.name, " - ", track.artist_name));
+  })));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SongList);
 
@@ -33688,9 +33774,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./client/node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _assets_album_png__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../assets/album.png */ "./client/assets/album.png");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-redux */ "./client/node_modules/react-redux/dist/react-redux.mjs");
+/* harmony import */ var _features_topTenTracksSlice__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../features/topTenTracksSlice */ "./client/src/features/topTenTracksSlice.js");
+
+
 
 
 var TopAlbum = function TopAlbum() {
+  var _tracks$, _tracks$2;
+  // const dispatch = useDispatch();
+  var tracks = (0,react_redux__WEBPACK_IMPORTED_MODULE_3__.useSelector)(function (state) {
+    return state.topTenTracks.tracks;
+  });
+  var status = (0,react_redux__WEBPACK_IMPORTED_MODULE_3__.useSelector)(function (state) {
+    return state.topTenTracks.status;
+  });
+
+  // useEffect(() => {
+  //   // Dispatch the fetchTracks async thunk when the component mounts
+  //   if (status === 'idle') {
+  //     dispatch(fetchTopTenTracks());
+  //   }
+
+  // }, [dispatch, status]);
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "topAlbum"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "MOST PLAYED ALBUM"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -33698,7 +33805,7 @@ var TopAlbum = function TopAlbum() {
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
     src: _assets_album_png__WEBPACK_IMPORTED_MODULE_1__,
     alt: "image"
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h4", null, "RUFUS DU SOL ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("br", null), " IN BLOOM")));
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h4", null, (_tracks$ = tracks[0]) === null || _tracks$ === void 0 ? void 0 : _tracks$.artist, " ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("br", null), " ", (_tracks$2 = tracks[0]) === null || _tracks$2 === void 0 ? void 0 : _tracks$2.album)));
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (TopAlbum);
 
@@ -33722,32 +33829,40 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+
+// Spotify configuration and connection details.
+// const spotifyToken = process.env.REACT_APP_SPOTIFY_TOKEN;
+// console.log('spotifyToken', spotifyToken);
+
 var initialState = {
   tracks: [],
   status: "idle",
   error: ""
 };
 var fetchTopTenTracks = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_0__.createAsyncThunk)('tracks/fetchTopTen', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-  var response;
+  var response, data;
   return _regeneratorRuntime().wrap(function _callee$(_context) {
     while (1) switch (_context.prev = _context.next) {
       case 0:
         _context.prev = 0;
         _context.next = 3;
-        return fetch('http://localhost:8000/db/top10Track');
+        return fetch('/db/top10Tracks');
       case 3:
         response = _context.sent;
-        console.log('response.data in fetchTopTenTracks:', response);
-        return _context.abrupt("return", response.data);
-      case 8:
-        _context.prev = 8;
+        _context.next = 6;
+        return response.json();
+      case 6:
+        data = _context.sent;
+        return _context.abrupt("return", data);
+      case 10:
+        _context.prev = 10;
         _context.t0 = _context["catch"](0);
         console.log("Error occured during fetchTopTenTracks in topTenTracksSlice: ".concat(_context.t0));
-      case 11:
+      case 13:
       case "end":
         return _context.stop();
     }
-  }, _callee, null, [[0, 8]]);
+  }, _callee, null, [[0, 10]]);
 })));
 var topTenTracksSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_0__.createSlice)({
   name: 'topTenTracks',
@@ -33820,6 +33935,13 @@ ___CSS_LOADER_EXPORT___.push([module.id, `html {
   height: 100%;
 }
 
+@media (max-width: 1215px) {
+  #root {
+    width: 100%;
+    height: 100%;
+  }
+}
+
 body {
   background: linear-gradient(45deg, #130188 0%, black 100%);
   background-size: 200% 200%;
@@ -33854,6 +33976,8 @@ h3 {
 
 ul {
   list-style: none;
+  padding: 0;
+  width: 400px;
 }
 
 .navBar {
@@ -33864,6 +33988,11 @@ ul {
   margin: 25px;
   height: 50px;
 }
+@media (max-width: 950px) {
+  .navBar + h3 {
+    font-size: 30px;
+  }
+}
 
 .gradientHeader {
   background: -webkit-linear-gradient(60deg, #B200FF, #0085FF, #0BEC21);
@@ -33871,17 +34000,39 @@ ul {
   -webkit-text-fill-color: transparent;
   font-family: "Red Hat Mono", monospace;
   font-size: 64px;
+  text-align: center;
+}
+@media (max-width: 1215px) {
+  .gradientHeader {
+    font-size: 50px;
+  }
+}
+@media (max-width: 950px) {
+  .gradientHeader {
+    font-size: 40px;
+  }
 }
 
 .SongList {
   color: white;
   font-family: "Red Hat Mono", monospace;
-  width: 400px;
+  width: 422px;
 }
 .SongList h3 {
   margin: 0px;
+  text-align: left;
+}
+@media (max-width: 1055px) {
+  .SongList h3 {
+    text-align: center;
+  }
 }
 
+@keyframes marquee {
+  100% {
+    transform: translate(-100%, 0);
+  }
+}
 .SongList li {
   border: 0.5px solid gray;
   width: 400px;
@@ -33889,18 +34040,37 @@ ul {
   padding: 10px;
   margin: 10px 0px;
   border-radius: 69px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.SongList li div {
+  animation: marquee 8s linear infinite;
+  padding-left: 100%;
+  display: inline-block;
+  text-align: left;
 }
 
 .trackListAndAlbum {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: flex-start;
+}
+@media (max-width: 1055px) {
+  .trackListAndAlbum {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 .topAlbum h3 {
   margin: 0;
   text-align: end;
   margin-bottom: 15px;
+}
+@media (max-width: 1055px) {
+  .topAlbum h3 {
+    text-align: center;
+  }
 }
 
 .albumCard {
@@ -33922,7 +34092,7 @@ ul {
   font-weight: 300;
   text-align: end;
   margin-right: -250px;
-}`, "",{"version":3,"sources":["webpack://./client/styles/index.scss"],"names":[],"mappings":"AAMA;EACE,WAAA;EACA,YAAA;AAJF;;AAOA;EACE,0DAAA;EACA,0BAAA;EACA,YAAA;EACA,WAAA;EACA,uCAAA;EACA,aAAA;EACA,mBAAA;EACA,sBAAA;EACA,sCAhBiB;EAiBjB,YAAA;AAJF;;AAOA;EACE;IACE,2BAAA;EAJF;EAOA;IACE,6BAAA;EALF;EAQA;IACE,2BAAA;EANF;AACF;AAWA;EACE,YAAA;EACA,eAAA;EACA,sCAvCiB;EAwCjB,gBAAA;EACA,kBAAA;AATF;;AAYA;EACE,gBAAA;AATF;;AAaA;EACE,aAAA;EACA,uBAAA;AAVF;AAYE;EACE,YAAA;EACA,YAAA;AAVJ;;AAcA;EACE,qEAAA;EACE,6BAAA;EACA,oCAAA;EACF,sCA/DiB;EAgEjB,eAAA;AAXF;;AAcA;EACE,YAAA;EACA,sCArEiB;EAsEjB,YAAA;AAXF;AAYE;EACE,WAAA;AAVJ;;AAeA;EACE,wBAAA;EACA,YAAA;EACA,kBAAA;EACA,aAAA;EACA,gBAAA;EACA,mBAAA;AAZF;;AAeA;EACE,aAAA;EACA,8BAAA;EACA,uBAAA;AAZF;;AAgBE;EACE,SAAA;EACA,eAAA;EACA,mBAAA;AAbJ;;AAiBA;EACE,6CAAA;EACA,YAAA;EACA,aAAA;EACA,aAAA;EACA,uBAAA;EACA,sBAAA;EACA,mBAAA;AAdF;AAeI;EACI,iBAAA;EACA,aAAA;EACA,YAAA;EACA,iBAAA;AAbR;AAeE;EACE,gBAAA;EACA,eAAA;EACA,oBAAA;AAbJ","sourcesContent":["// importing of fonts\n@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300..700;1,300..700&display=swap');\n\n\n$font-family-mono: \"Red Hat Mono\", monospace;\n// gradient animation style for landing page\nhtml {\n  width: 100%;\n  height: 100%;\n}\n\nbody {\n  background: linear-gradient(45deg, #130188 0%, darken(#13008b, 50%) 100%);\n  background-size: 200% 200%;\n  height: 100%;\n  width: 100%;\n  animation: background 20s ease infinite;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  font-family: $font-family-mono;\n  color: white;\n}\n\n@keyframes background {\n  0% {\n    background-position: 0% 50%;\n  }\n\n  50% {\n    background-position: 100% 50%;\n  }\n\n  100% {\n    background-position: 0% 50%;\n  }\n}\n\n//html tag styles\n\nh3 {\n  color: white;\n  font-size: 36px;\n  font-family: $font-family-mono;\n  font-weight: 300;\n  text-align: center;\n}\n\nul {\n  list-style: none;\n}\n\n\n.navBar {\n  display: flex;\n  justify-content: center;\n\n  img {\n    margin: 25px;\n    height: 50px;\n  }\n}\n\n.gradientHeader {\n  background: -webkit-linear-gradient(60deg, #B200FF, #0085FF, #0BEC21);\n    -webkit-background-clip: text;\n    -webkit-text-fill-color: transparent;\n  font-family: $font-family-mono;\n  font-size: 64px;\n}\n\n.SongList {\n  color: white;\n  font-family: $font-family-mono;\n  width: 400px;\n  h3 {\n    margin: 0px;\n  }\n}\n\n\n.SongList li {\n  border: 0.5px solid gray;\n  width: 400px;\n  text-align: center;\n  padding: 10px;\n  margin: 10px 0px;\n  border-radius: 69px;\n}\n\n.trackListAndAlbum {\n  display: flex;\n  justify-content: space-between;\n  align-items: flex-start;\n}\n\n.topAlbum {\n  h3 {\n    margin: 0;\n    text-align: end;\n    margin-bottom: 15px;\n  }\n}\n\n.albumCard {\n  background: linear-gradient(#ADADFF, #6072D1);\n  width: 500px;\n  height: 515px;\n  display: flex;\n  justify-content: center;\n  flex-direction: column;\n  align-items: center;\n    img {\n        padding-top: 25px;\n        height: 400px;\n        width: 425px;\n        object-fit: cover;\n      }\n  h4 {\n    font-weight: 300;\n    text-align: end;\n    margin-right: -250px;\n  }\n}\n\n"],"sourceRoot":""}]);
+}`, "",{"version":3,"sources":["webpack://./client/styles/index.scss"],"names":[],"mappings":"AAMA;EACE,WAAA;EACA,YAAA;AAJF;;AAQE;EADF;IAEI,WAAA;IACA,YAAA;EAJF;AACF;;AAQA;EACE,0DAAA;EACA,0BAAA;EACA,YAAA;EACA,WAAA;EACA,uCAAA;EACA,aAAA;EACA,mBAAA;EACA,sBAAA;EACA,sCAxBiB;EAyBjB,YAAA;AALF;;AAQA;EACE;IACE,2BAAA;EALF;EAQA;IACE,6BAAA;EANF;EASA;IACE,2BAAA;EAPF;AACF;AAYA;EACE,YAAA;EACA,eAAA;EACA,sCA/CiB;EAgDjB,gBAAA;EACA,kBAAA;AAVF;;AAaA;EACE,gBAAA;EACA,UAAA;EACA,YAAA;AAVF;;AAcA;EACE,aAAA;EACA,uBAAA;AAXF;AAaE;EACE,YAAA;EACA,YAAA;AAXJ;AAeI;EADF;IAEI,eAAA;EAZJ;AACF;;AAgBA;EACE,qEAAA;EACE,6BAAA;EACA,oCAAA;EACF,sCA/EiB;EAgFjB,eAAA;EACA,kBAAA;AAbF;AAcI;EAPJ;IAQM,eAAA;EAXJ;AACF;AAYI;EAVJ;IAWM,eAAA;EATJ;AACF;;AAYA;EACE,YAAA;EACA,sCA5FiB;EA6FjB,YAAA;AATF;AAUE;EACE,WAAA;EACA,gBAAA;AARJ;AASI;EAHF;IAII,kBAAA;EANJ;AACF;;AAUA;EACE;IACE,8BAAA;EAPF;AACF;AAUA;EACE,wBAAA;EACA,YAAA;EACA,kBAAA;EACA,aAAA;EACA,gBAAA;EACA,mBAAA;EACA,mBAAA;EACA,gBAAA;AARF;AASI;EACE,qCAAA;EACA,kBAAA;EACA,qBAAA;EACA,gBAAA;AAPN;;AAWA;EACE,aAAA;EACA,6BAAA;EACA,uBAAA;AARF;AASE;EAJF;IAKI,sBAAA;IACA,mBAAA;EANF;AACF;;AAUE;EACE,SAAA;EACA,eAAA;EACA,mBAAA;AAPJ;AAQI;EAJF;IAKI,kBAAA;EALJ;AACF;;AASA;EACE,6CAAA;EACA,YAAA;EACA,aAAA;EACA,aAAA;EACA,uBAAA;EACA,sBAAA;EACA,mBAAA;AANF;AAOI;EACI,iBAAA;EACA,aAAA;EACA,YAAA;EACA,iBAAA;AALR;AAOE;EACE,gBAAA;EACA,eAAA;EACA,oBAAA;AALJ","sourcesContent":["// importing of fonts\n@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Mono:ital,wght@0,300..700;1,300..700&display=swap');\n\n\n$font-family-mono: \"Red Hat Mono\", monospace;\n// gradient animation style for landing page\nhtml {\n  width: 100%;\n  height: 100%;\n}\n\n#root {\n  @media (max-width: 1215px) {\n    width: 100%;\n    height: 100%;\n  }\n\n}\n\nbody {\n  background: linear-gradient(45deg, #130188 0%, darken(#13008b, 50%) 100%);\n  background-size: 200% 200%;\n  height: 100%;\n  width: 100%;\n  animation: background 20s ease infinite;\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  font-family: $font-family-mono;\n  color: white;\n}\n\n@keyframes background {\n  0% {\n    background-position: 0% 50%;\n  }\n\n  50% {\n    background-position: 100% 50%;\n  }\n\n  100% {\n    background-position: 0% 50%;\n  }\n}\n\n//html tag styles\n\nh3 {\n  color: white;\n  font-size: 36px;\n  font-family: $font-family-mono;\n  font-weight: 300;\n  text-align: center;\n}\n\nul {\n  list-style: none;\n  padding: 0;\n  width: 400px;\n}\n\n\n.navBar {\n  display: flex;\n  justify-content: center;\n\n  img {\n    margin: 25px;\n    height: 50px;\n  }\n\n  + h3 {\n    @media (max-width: 950px) {\n      font-size: 30px;\n    }\n  }\n}\n\n.gradientHeader {\n  background: -webkit-linear-gradient(60deg, #B200FF, #0085FF, #0BEC21);\n    -webkit-background-clip: text;\n    -webkit-text-fill-color: transparent;\n  font-family: $font-family-mono;\n  font-size: 64px;\n  text-align: center;\n    @media (max-width: 1215px) {\n      font-size: 50px;\n    }\n    @media (max-width: 950px) {\n      font-size: 40px;\n    }\n}\n\n.SongList {\n  color: white;\n  font-family: $font-family-mono;\n  width: 422px;\n  h3 {\n    margin: 0px;\n    text-align: left;\n    @media (max-width: 1055px) {\n      text-align: center;\n    }\n  }\n}\n\n@keyframes marquee{\n  100%{\n    transform: translate(-100%, 0);\n  }\n}\n\n.SongList li {\n  border: 0.5px solid gray;\n  width: 400px;\n  text-align: center;\n  padding: 10px;\n  margin: 10px 0px;\n  border-radius: 69px;\n  white-space: nowrap;\n  overflow: hidden;\n    div {\n      animation: marquee 8s linear infinite;\n      padding-left: 100%;\n      display: inline-block;\n      text-align: left;\n    }\n}\n\n.trackListAndAlbum {\n  display: flex;\n  justify-content: space-around;\n  align-items: flex-start;\n  @media (max-width: 1055px) {\n    flex-direction: column;\n    align-items: center;\n  }\n}\n\n.topAlbum {\n  h3 {\n    margin: 0;\n    text-align: end;\n    margin-bottom: 15px;\n    @media (max-width: 1055px) {\n      text-align: center;\n    }\n  }\n}\n\n.albumCard {\n  background: linear-gradient(#ADADFF, #6072D1);\n  width: 500px;\n  height: 515px;\n  display: flex;\n  justify-content: center;\n  flex-direction: column;\n  align-items: center;\n    img {\n        padding-top: 25px;\n        height: 400px;\n        width: 425px;\n        object-fit: cover;\n      }\n  h4 {\n    font-weight: 300;\n    text-align: end;\n    margin-right: -250px;\n  }\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -34072,15 +34242,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
 /* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_sass_loader_dist_cjs_js_index_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/sass-loader/dist/cjs.js!./index.scss */ "./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./client/styles/index.scss");
 
-
-
-
-
-
-
-
-
-
+      
+      
+      
+      
+      
+      
+      
+      
+      
 
 var options = {};
 
@@ -34088,7 +34258,7 @@ options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTra
 options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
 
       options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
-
+    
 options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
 options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
 
@@ -34553,7 +34723,7 @@ function isValidKey(key) {
 function getMessage(type) {
   const splitType = type ? `${type}`.split("/") : [];
   const actionName = splitType[splitType.length - 1] || "actionCreator";
-  return `Detected an action creator with type "${type || "unknown"}" being dispatched.
+  return `Detected an action creator with type "${type || "unknown"}" being dispatched. 
 Make sure you're calling the action creator before dispatching, i.e. \`dispatch(${actionName}())\` instead of \`dispatch(${actionName})\`. This is necessary even if the action has no payload.`;
 }
 function createActionCreatorInvariantMiddleware(options = {}) {
@@ -34585,7 +34755,7 @@ function getTimeMeasureUtils(maxDelay, fnName) {
     },
     warnIfExceeded() {
       if (elapsed > maxDelay) {
-        console.warn(`${fnName} took ${elapsed}ms, which is more than the warning threshold of ${maxDelay}ms.
+        console.warn(`${fnName} took ${elapsed}ms, which is more than the warning threshold of ${maxDelay}ms. 
 If your state or actions are very large, you may want to disable the middleware as it might cause too much of a slowdown in development mode. See https://redux-toolkit.js.org/api/getDefaultMiddleware for instructions.
 It is disabled in production builds, so you don't need to worry about that.`);
       }
@@ -40201,7 +40371,7 @@ var createStructuredSelector = Object.assign(
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/
+/******/ 	
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -40215,17 +40385,17 @@ var createStructuredSelector = Object.assign(
 /******/ 			loaded: false,
 /******/ 			exports: {}
 /******/ 		};
-/******/
+/******/ 	
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/
+/******/ 	
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
+/******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat get default export */
 /******/ 	(() => {
@@ -40238,7 +40408,7 @@ var createStructuredSelector = Object.assign(
 /******/ 			return getter;
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/create fake namespace object */
 /******/ 	(() => {
 /******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
@@ -40268,7 +40438,7 @@ var createStructuredSelector = Object.assign(
 /******/ 			return ns;
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -40280,7 +40450,7 @@ var createStructuredSelector = Object.assign(
 /******/ 			}
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/global */
 /******/ 	(() => {
 /******/ 		__webpack_require__.g = (function() {
@@ -40292,12 +40462,12 @@ var createStructuredSelector = Object.assign(
 /******/ 			}
 /******/ 		})();
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -40308,7 +40478,7 @@ var createStructuredSelector = Object.assign(
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
 /******/ 		__webpack_require__.nmd = (module) => {
@@ -40317,7 +40487,7 @@ var createStructuredSelector = Object.assign(
 /******/ 			return module;
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	(() => {
 /******/ 		var scriptUrl;
@@ -40340,12 +40510,12 @@ var createStructuredSelector = Object.assign(
 /******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
 /******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/nonce */
 /******/ 	(() => {
 /******/ 		__webpack_require__.nc = undefined;
 /******/ 	})();
-/******/
+/******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
