@@ -10,9 +10,16 @@ const SongList = () => {
   const [endClipTimeout, setEndClipTimeout] = useState(null);
 
   const dispatch = useDispatch();
-  const tracks = useSelector((state) => state.topTenTracks.tracks);
+  const { tracks, status, error } = useSelector(state => state.topTenTracks);
 
-  const status = useSelector((state) => state.topTenTracks.status);
+  if (status === 'loading') {
+    console.log('loading tracks from state in songList.jsx');
+  }
+
+  if (status === 'failed') {
+    console.log('FAILED: loading tracks from state in songList.jsx');
+  }
+
 
 
   useEffect(() => {
@@ -23,10 +30,10 @@ const SongList = () => {
   }, [dispatch, status]);
 
 
-   const controlAudio = (previewUrl, trackId) => {
+   const controlAudio = (audio_clip_url, trackId) => {
 
     // For now, in the cases when the previewUrl is null as it sometimes is. 2024-01-12_05-10-PM PST.
-    if (!previewUrl) return;
+    if (!audio_clip_url) return;
 
     // function to fade the audio in or out
     const fadeAudio = (audio, increment, delay, callback) => {
@@ -43,7 +50,7 @@ const SongList = () => {
 
     const playAudio = () => {
       setIsClickedId(trackId);
-      const newAudio = new Audio(previewUrl);
+      const newAudio = new Audio(audio_clip_url);
       newAudio.volume = 0.0;
       newAudio.play();
 
@@ -80,8 +87,8 @@ const SongList = () => {
     }
   }
 
- 
- 
+
+
   return (
     <div className="SongList">
       <h3>TOP 10 TRACKS</h3>
@@ -89,10 +96,10 @@ const SongList = () => {
         {tracks.map(track => (
           <li key={track.id}>
             <div className={isClickedId === track.id ? 'onPlay' : 'tracks'} >
-                <div onClick={() => controlAudio(track.preview, track.id)}>
-                {track.name} - {track.artist_name}                      
-                </div>                               
-                <div onClick={() => controlAudio(track.preview, track.id)}>
+                <div onClick={() => controlAudio(track.audio_clip_url, track.id)}>
+                {track.name} - {track.artist_name}
+                </div>
+                <div onClick={() => controlAudio(track.audio_clip_url, track.id)}>
                 {track.name} - {track.artist_name}
                 </div>
               </div>
