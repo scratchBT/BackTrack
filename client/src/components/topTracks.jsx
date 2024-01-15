@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import logo from '../../assets/logo.png';
-import { fetchTopTenTracks } from '../features/topTenTracksSlice.js';
+import { reducer } from '../features/slice.js';
 // import store from '../store/store.js';
 import { useDispatch, useSelector } from 'react-redux';
 
-const SongList = () => {
+const top10Tracks = () => {
   const [audio, setAudio] = useState(null);
   const [isClickedId, setIsClickedId] = useState(null);
   const [endClipTimeout, setEndClipTimeout] = useState(null);
 
   const dispatch = useDispatch();
   // KG 2024-01-14_03-20-PM: consolidated tracks, status, and error into one object.
-  const { tracks, status, error } = useSelector(state => state.topTenTracks);
+  const { tracks, status, error } = useSelector(state => state.top10Tracks);
 
   if (status === 'loading') {
     // console.log('loading tracks from state in songList.jsx');
@@ -29,7 +29,7 @@ const SongList = () => {
   useEffect(() => {
     // Dispatch the fetchTracks async thunk when the component mounts
     if (status === 'idle') {
-      dispatch(fetchTopTenTracks());
+      dispatch(reducer.top10Tracks(reducer.top10Tracks.name));
     }
   }, [dispatch, status]);
 
@@ -115,4 +115,4 @@ const SongList = () => {
   )
 }
 
-export default SongList;
+export default top10Tracks;

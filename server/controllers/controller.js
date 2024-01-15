@@ -17,6 +17,8 @@ controller.getTop10Artists = (req, res) => handleRequest(queries.getTop10Artists
 controller.getTop10Albums = (req, res) => handleRequest(queries.getTop10Albums, req, res);
 controller.getTop10Tracks = (req, res) => handleRequest(queries.getTop10Tracks, req, res);
 
+controller.updateTracks = (req, res) => handleRequest(queries.updateTracks, req, res);
+
 
 //Ross added this to set up a route for front end slider to get tracks by year. right now the query times out each time. not using handleRequest
 //yet, as we are not responding to request yet, we are taking data to pass it on to them filter in another controller. didn't want to refactor the

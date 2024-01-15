@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTopTenTracksByYear } from '../features/topTenTracksByYearSlice.js';
+// import { fetchTopTenTracksByYear } from '../features/topTenTracksByYearSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 
 const TopTenTracksByYear = () => {
   const [year, setYear] = useState(2000);
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const tracks = useSelector((state) => state.topTenTracksByYear.tracks);
   const status = useSelector((state) => state.topTenTracksByYear.status);
 
@@ -13,9 +13,9 @@ const TopTenTracksByYear = () => {
     setYear(e.target.value);
   }
 
-  function handleClick() {
-    dispatch(fetchTopTenTracksByYear(year));
-  }
+  // function handleClick() {
+  //   dispatch(fetchTopTenTracksByYear(year));
+  // }
 
   return (
     <>

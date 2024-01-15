@@ -41,11 +41,59 @@ const executeQuery = async (queryCallback) => {
   return data;
 };
 
+
+
+
 // Consolidated queries down into object of "basic queries" to be change upon project reqs changing
 const queries = {
+  updateTracks: () => executeQuery(async (supabase) => {
+    let updateCount = 0;
+    console.log('updateTracks', 'supabase')
+    return supabase
+      .from('tracks')
+      .select('*')
+      .order('playtime_ms', { ascending: false })
+      .eq('api_data_added', false)
+      .limit(1000)
+      .then(async (response) => {
+        const tracks = response.data
+
+        for (const track of tracks) {
+            const update = {};
+
+            const trackInfo = await getTrackInfo(track.uri);
+            update.api_data_added = true;
+
+            update.image_url = trackInfo.album.images[1].url;
+            update.audio_clip_url = trackInfo.preview_url;
+            update.duration_ms = trackInfo.duration_ms;
+            update.popularity = trackInfo.popularity;
+            update.explicit = trackInfo.explicit;
+            // console.log('update', update);
+            // Update the record in the database with the new values
+
+            // const updateTrackCall =  await supabase
+            updateCount++;
+            await supabase
+                .from('tracks')
+                .update(update)
+                .eq('id', track.id);
+              // console.log('tracks updated at index', index, tracks);
+          // updateTrackCall()
+          updateCount++;
+          if (updateCount % 500 === 0) {
+            console.log('updateCount:', updateCount);
+          }
+          console.log('trackId', track.id);
+        }
+        console.log('updating Tracks complete. Updated track #:', updateCount);
+        return tracks;
+      });
+  }),
 // now querying the Tracks table, rather than a view.
 // can replicate this with artists and albums.
   getTop10Tracks: () => executeQuery(async (supabase) => supabase
+  // .updateTracks()
     .from('tracks')
     .select('*')
     .order('playtime_ms', { ascending: false })

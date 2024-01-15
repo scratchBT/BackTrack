@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import album from '../../assets/album.png';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTopTenTracks } from '../features/topTenTracksSlice';
+import { fetchTopTenTracks } from '../features/slice';
 
 const TopAlbum = () => {
   // const dispatch = useDispatch();
