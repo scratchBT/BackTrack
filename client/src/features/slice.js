@@ -10,7 +10,7 @@ const initialState = {
   error: ""
 };
 
-const reducer = []
+const reducer = {}
 
 // Keith 2024-01-14_03-28-PM: added in new Error and throwing the error below.
 // should allow for site to still load even if the fetch request fails.
@@ -27,7 +27,7 @@ const fetchFn = (url) => createAsyncThunk(
         console.log('slice.js data.json', data);
         return data;
       } catch (err) {
-        console.log(`Error occurred during ${functionName} in slice.js: ${err}`);
+        console.log(`Error occurred fetching url in slice.js: ${err}`);
         throw err;
       }
   }
@@ -58,10 +58,10 @@ const sliceFn = (url) => createSlice({
   }
 });
 
-reducer.top10Tracks = sliceFn('top10Tracks')
+reducer.topTracks = sliceFn('topTracks').reducer
 // reducer.top10Artists = sliceFn('/db/top10Artists', reducer.name)
 // reducer.top10Albums = sliceFn('/db/top10Albums', reducer.name)
-// reducer.top10TracksByYear = sliceFn('/db/top10TracksByYear', reducer.name)
+// reducer.topTracksByYear = sliceFn('/db/topTracksByYear', reducer.name)
 
 
-export { reducer };
+export { reducer, fetchFn };

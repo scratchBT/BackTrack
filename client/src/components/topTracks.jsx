@@ -4,14 +4,21 @@ import { reducer } from '../features/slice.js';
 // import store from '../store/store.js';
 import { useDispatch, useSelector } from 'react-redux';
 
-const top10Tracks = () => {
+const TopTracks = () => {
   const [audio, setAudio] = useState(null);
   const [isClickedId, setIsClickedId] = useState(null);
   const [endClipTimeout, setEndClipTimeout] = useState(null);
 
   const dispatch = useDispatch();
   // KG 2024-01-14_03-20-PM: consolidated tracks, status, and error into one object.
-  const { tracks, status, error } = useSelector(state => state.top10Tracks);
+  console.log('tracks, status, error in topTracks.jsx:');
+  const topTracksState = useSelector(state => state.topTracks);
+  console.log('topTracksState', topTracksState);
+  const { tracks, status, error } = useSelector(state => state.topTracks);
+  console.log('state', state);
+  console.log('status', status)
+  console.log('error', error);
+  console.log('state.topTracks', state.topTracks);
 
   if (status === 'loading') {
     // console.log('loading tracks from state in songList.jsx');
@@ -29,7 +36,7 @@ const top10Tracks = () => {
   useEffect(() => {
     // Dispatch the fetchTracks async thunk when the component mounts
     if (status === 'idle') {
-      dispatch(reducer.top10Tracks(reducer.top10Tracks.name));
+      dispatch(reducer.topTracks());
     }
   }, [dispatch, status]);
 
@@ -115,4 +122,4 @@ const top10Tracks = () => {
   )
 }
 
-export default top10Tracks;
+export default TopTracks;

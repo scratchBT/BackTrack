@@ -4,7 +4,7 @@ import { reducer } from '../features/slice.js';
 
 export const store = configureStore({
   reducer: {
-    top10Tracks: reducer.top10Tracks,
+    topTracks: reducer.topTracks,
     // topTenTracksByYear: topTenTracksByYearReducer
   }
   // devTools: process.env.NODE_ENV !== 'production',

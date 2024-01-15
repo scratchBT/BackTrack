@@ -33,15 +33,12 @@ const getTrackInfo = async (uri) => {
   return await response.json();
 }
 
-
 const executeQuery = async (queryCallback) => {
   const { data, error } = await queryCallback(supabase);
   if (error) throw error;
   if (data.length === 0) return [];
   return data;
 };
-
-
 
 
 // Consolidated queries down into object of "basic queries" to be change upon project reqs changing
@@ -92,7 +89,7 @@ const queries = {
   }),
 // now querying the Tracks table, rather than a view.
 // can replicate this with artists and albums.
-  getTop10Tracks: () => executeQuery(async (supabase) => supabase
+  getTopTracks: () => executeQuery(async (supabase) => supabase
   // .updateTracks()
     .from('tracks')
     .select('*')
@@ -142,7 +139,7 @@ const queries = {
   //Ross added this to set up a route for front end slider to get tracks by year. commented out part of the query just to test as this query
   //keeps timing out. trying to join the sessions table on sessions.track_id = tracks.id and pull in the sessions.ts field to filter by year
   //downstream
-  getTop10TracksByYear: () =>
+  getTopTracksByYear: () =>
     executeQuery(async (supabase) => supabase
     .from('tracks')
     .select(`
