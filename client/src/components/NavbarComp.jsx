@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from '../../assets/logo.png';
 
-const Navbar = () => {
+const NavbarComp = () => {
   return (
     <div className="navBar">
       <img src={logo}/>
@@ -9,5 +9,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar;
-
+export default NavbarComp;

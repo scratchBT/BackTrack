@@ -1,42 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import logo from '../../assets/logo.png';
-import { reducer } from '../features/slice.js';
+import { fetchTopTracks } from '../features/slice.js';
 // import store from '../store/store.js';
 import { useDispatch, useSelector } from 'react-redux';
 
-const TopTracks = () => {
+const TopTracksComp = () => {
+  const dispatch = useDispatch();
   const [audio, setAudio] = useState(null);
   const [isClickedId, setIsClickedId] = useState(null);
   const [endClipTimeout, setEndClipTimeout] = useState(null);
 
-  const dispatch = useDispatch();
   // KG 2024-01-14_03-20-PM: consolidated tracks, status, and error into one object.
-  console.log('tracks, status, error in topTracks.jsx:');
-  const topTracksState = useSelector(state => state.topTracks);
-  console.log('topTracksState', topTracksState);
-  const { tracks, status, error } = useSelector(state => state.topTracks);
-  console.log('state', state);
-  console.log('status', status)
-  console.log('error', error);
-  console.log('state.topTracks', state.topTracks);
+  const { data: topTracks, status } = useSelector(state => state.topTracks);
+  // console.log('tracks', topTracks);
+  console.log('status in topTracksComp from reducer:', status)
 
   if (status === 'loading') {
     // console.log('loading tracks from state in songList.jsx');
   }
-
   if (status === 'failed') {
-    console.log('FAILED: loading tracks from state in songList.jsx');
-  }
-
-  if (error) {
-    console.log('ERROR: loading tracks from state in songList.jsx');
+    console.log('FAILED: loading tracks from state in topTracksComp.jsx');
   }
 
 
   useEffect(() => {
     // Dispatch the fetchTracks async thunk when the component mounts
     if (status === 'idle') {
-      dispatch(reducer.topTracks());
+      console.log('dispatching fetchTopTracks from topTracksComp.jsx');
+      dispatch(fetchTopTracks());
     }
   }, [dispatch, status]);
 
@@ -99,12 +90,12 @@ const TopTracks = () => {
   }
 
   // Keith 2024-01-14_03-27-PM: changed the key 'preview' to 'audio_clip_url' for specificity.
-
+  console.log('topTracks in topTracksComp.jsx', topTracks);
   return (
     <div className="SongList">
       <h3>TOP 10 TRACKS</h3>
       <ul>
-        {tracks.map(track => (
+        {topTracks.map(track => (
           <li key={track.id}>
             <div className={isClickedId === track.id ? 'onPlay' : 'tracks'} >
 
@@ -122,4 +113,4 @@ const TopTracks = () => {
   )
 }
 
-export default TopTracks;
+export default TopTracksComp;

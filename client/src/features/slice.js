@@ -1,67 +1,75 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// Spotify configuration and connection details.
-// const spotifyToken = process.env.REACT_APP_SPOTIFY_TOKEN;
-// console.log('spotifyToken', spotifyToken);
+// Keith 2024-01-15_01-14-PM
+// refactored this file to have helper helper fetch and slice functions
+// that can be be resued for any slice. reduces code duplication.
 
 const initialState = {
-  tracks: [],
+  data: [],
+  year: 2020,
   status: "idle",
-  error: ""
+  error: "",
 };
 
-const reducer = {}
-
-// Keith 2024-01-14_03-28-PM: added in new Error and throwing the error below.
-// should allow for site to still load even if the fetch request fails.
-const fetchFn = (url) => createAsyncThunk(
-  // 'tracks/fetchTopTen',
-    async () => {
-      try {
-        const response = await fetch(`db/${url}`);
-        if (!response.ok) {
-          console.log('Response not okay:', await response.text());
-          throw new Error(`Fetch request failed in in slice.js at endpoint ${url} via function ${url}`);
-        }
-        const data = await response.json()
-        console.log('slice.js data.json', data);
-        return data;
-      } catch (err) {
-        console.log(`Error occurred fetching url in slice.js: ${err}`);
-        throw err;
+const sliceFn = (title) => {
+  console.log('title in sliceFn:', title);
+  const fetchFn = createAsyncThunk(
+    `fetch/${title}`,
+    async (arg) => {
+      let url = `db/${title}`;
+      if (arg && arg.path) {
+        url = `db/${title}/${arg.path}`;
       }
-  }
-);
-
-const sliceFn = (url) => createSlice({
-  name: url,
-  initialState,
-  reducers: {
-  },
-
-  extraReducers(builder) {
-    builder
-      .addCase(fetchFn(url).pending, (state, action) => {
-        console.log(`statusPENDING for ${url} in slice.js`);
-        state.status = "loading";
-      })
-      .addCase(fetchFn(url).fulfilled, (state, action) => {
-        console.log(`status FULFILLED for ${url} in slice.js`);
-        state.status = "succeeded"
-        state.tracks = action.payload;
-      })
-      .addCase(fetchFn(url).rejected, (state, action) => {
-        console.log(`status REJECTED for ${url} in slice.js`);
-        state.status = "failed";
-        state.error = action.error.message;
-      })
-  }
-});
-
-reducer.topTracks = sliceFn('topTracks').reducer
-// reducer.top10Artists = sliceFn('/db/top10Artists', reducer.name)
-// reducer.top10Albums = sliceFn('/db/top10Albums', reducer.name)
-// reducer.topTracksByYear = sliceFn('/db/topTracksByYear', reducer.name)
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Fetch request failed at endpoint ${url}`);
+      }
+      const data = await response.json();
+      return data;
+    }
+  );
 
 
-export { reducer, fetchFn };
+  const slice = createSlice({
+    name: title,
+    initialState,
+    reducers: {},
+    extraReducers(builder) {
+      builder
+        .addCase(fetchFn.pending, (state, action) => {
+          state.status = "loading";
+        })
+        .addCase(fetchFn.fulfilled, (state, action) => {
+          state.status = "succeeded"
+          state.data = action.payload;
+          if (title === 'topTracksByYear') {
+            state.year = action.meta.arg.year;
+          }
+        })
+        .addCase(fetchFn.rejected, (state, action) => {
+          console.log(`status REJECTED for ${title} in slice.js`);
+          state.status = "failed";
+          state.error = action.error.message;
+        })
+    }
+  });
+  // console.log('slice:', slice);
+  // console.log('fetchFn:', fetchFn);
+  return { slice, fetchFn };
+}
+const { slice: topTracksSlice, fetchFn: fetchTopTracks } = sliceFn('topTracks');
+const { slice: topAlbumsSlice, fetchFn: fetchTopAlbums } = sliceFn('topAlbums');
+const { slice: topArtistsSlice, fetchFn: fetchTopArtists } = sliceFn('topArtists');
+const { slice: topTracksByYearSlice, fetchFn: fetchTopTracksByYear } = sliceFn('topTracksByYear');
+
+
+export {
+  fetchTopTracks,
+  fetchTopAlbums,
+  fetchTopArtists,
+  fetchTopTracksByYear,
+  topTracksSlice,
+  topAlbumsSlice,
+  topArtistsSlice,
+  topTracksByYearSlice,
+};

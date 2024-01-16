@@ -2,9 +2,10 @@ import express from 'express';
 const router = express.Router();
 import controller from '../controllers/controller.js';
 
-router.get('/db/top10Albums', controller.getTop10Albums);
-router.get('/db/top10Artists', controller.getTop10Artists);
+router.get('/db/topAlbums', controller.getTopAlbums);
+router.get('/db/topArtists', controller.getTopArtists);
 router.get('/db/topTracks', controller.getTopTracks);
+router.get('/db/topTracksByYear', controller.getTopTracksByYear);
 
 //Ross added this to set up a route for front end slider to get tracks by year. This is still timing out at the database call in models
 // router.get('/db/topTracksByYear', controller.getTopTracksByYear, controller.filterByYear);

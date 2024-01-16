@@ -1,14 +1,17 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { reducer } from '../features/slice.js';
-// import topTenTracksByYearReducer from '../features/topTenTracksByYearSlice.js';
+import { topTracksSlice, topAlbumsSlice, topArtistsSlice, topTracksByYearSlice } from '../features/slice.js';
 
 export const store = configureStore({
   reducer: {
-    topTracks: reducer.topTracks,
-    // topTenTracksByYear: topTenTracksByYearReducer
-  }
+    topTracks: topTracksSlice.reducer,
+    topAlbums: topAlbumsSlice.reducer,
+    topArtists: topArtistsSlice.reducer,
+    topTracksByYear: topTracksByYearSlice.reducer,
+  },
   // devTools: process.env.NODE_ENV !== 'production',
 });
 
-
-export default store;
+export const logState = (store) => {
+  // console.log(store.getState());
+  console.log('State:', JSON.stringify(store.getState(), null, 2));
+}

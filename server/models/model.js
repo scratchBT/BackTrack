@@ -110,7 +110,7 @@ const queries = {
     // return tracks;
   ),
 
-  getTop10Artists: () => executeQuery(async (supabase) => supabase
+  getTopArtists: () => executeQuery(async (supabase) => supabase
     .from('artists')
     .select('*')
     .neq('playtime_ms', 0)
@@ -118,7 +118,7 @@ const queries = {
     .limit(10)
   ),
 
-  getTop10Albums: () => executeQuery(async (supabase) => supabase
+  getTopAlbums: () => executeQuery(async (supabase) => supabase
     .from('albums')
     .select('*')
     .neq('playtime_ms', 0)
@@ -139,33 +139,68 @@ const queries = {
   //Ross added this to set up a route for front end slider to get tracks by year. commented out part of the query just to test as this query
   //keeps timing out. trying to join the sessions table on sessions.track_id = tracks.id and pull in the sessions.ts field to filter by year
   //downstream
-  getTopTracksByYear: () =>
-    executeQuery(async (supabase) => supabase
-    .from('tracks')
-    .select(`
-      name,
-      artist_name,
-      album_name,
-      playtime_ms,
-      sessions (
-        ts,
-        track_id
-        )
-    `)
-    .order('playtime_ms', { ascending: false })
-    .limit(100)
-    ).then(tracks => tracks)
-  //   .then(async tracks => {
-  //   for (const track of tracks) {
-  //     const trackInfo = await getTrackInfo(track.uri);
-  //     track.preview = trackInfo.preview_url;
-  //     track.albumImage = trackInfo.album.images[1].url;
-  //     track.duration = trackInfo.duration_ms;
-  //     track.popularity = trackInfo.popularity;
-  //     track.explicit = trackInfo.explicit;
-  //   }
-  //   return tracks;
-  // })
+  // getTopTracksByYear: (req, res) =>
+  // executeQuery(async (supabase) => supabase
+  //   .from('sessions')
+  //   .select(`
+  //     track_id,
+  //     count(track_id) as play_count,
+  //     tracks (
+  //       name,
+  //       artist_name,
+  //       album_name,
+  //       playtime_ms
+  //     )
+  //   `)
+  //   .filter('ts', 'like', `%${req.query.year}%`)
+  //   .group('track_id')
+  //   .order('play_count', { ascending: false })
+  //   .limit(10)
+  // )
+  getTopTracksByYear: async (req, res) => {
+    const year = req.query.year;
+
+    // Query the sessions table to get the track_ids that match the year
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('sessions')
+      .select('track_id')
+      .eq('sesh_year', year)
+      .limit(10);
+
+    if (sessionError) throw sessionError;
+
+    // Extract the track_ids from the sessionData
+    const trackIds = sessionData.map(session => session.track_id);
+console.log('trackIds', trackIds);
+    // Query the tracks table to get the track details for the track_ids
+    const { data: trackData, error: trackError } = await supabase
+      .from('tracks')
+      .select('name, artist_name, album_name, playtime_ms')
+      .in('id', trackIds)
+      .order('playtime_ms', { ascending: false })
+      .limit(10);
+
+    if (trackError) throw trackError;
+
+    // Combine the sessionData and trackData
+    const combinedData = trackData.map(track => ({
+      ...track,
+      play_count: sessionData.filter(session => session.track_id === track.id).length,
+    }));
+
+    return combinedData;
+  }
+  // getTopTracksByYear: (req, res) =>
+  // executeQuery(async (supabase) => supabase
+  //   .rpc('get_top_tracks_by_year', { year: req.query.year })
+  // )
+  // getTopTracksByYear: () => executeQuery(async (supabase) => supabase
+  // .from('tracks')
+  // .select('*')
+  // .order('playtime_ms', { ascending: false })
+  // .limit(10)
+  // ),
+
 };
 
 export { queries };
