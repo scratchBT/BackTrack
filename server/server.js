@@ -8,7 +8,7 @@ import cors from 'cors';
 import tracksRouter from './routes/tracksRouter.js';
 import artistsRouter from './routes/artistsRouter.js';
 import albumsRouter from './routes/albumsRouter.js';
-
+import usersRouter from './routes/usersRouter.js';
 
 // Load environment variables from .env.server.
 dotenv.config({ path: '.env.server' });
@@ -35,6 +35,7 @@ app.use(cors(corsOptions));
 app.use('/tracks', tracksRouter);
 app.use('/artists', artistsRouter);
 app.use('/albums', albumsRouter);
+app.use('/users', usersRouter);
 
 app.use((err, req, res, next) => {
     const defaultErr = {
