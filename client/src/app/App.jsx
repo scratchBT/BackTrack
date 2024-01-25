@@ -8,6 +8,7 @@ import TopAlbumComp from '../components/TopAlbumComp.jsx';
 import GraphComp from '../components/GraphComp.jsx';
 import LogStateComp from '../components/LogStateComp.jsx';
 import YearSliderComp from '../components/SliderComp.jsx';
+import SignupComp from '../components/SignupComp.jsx';
 import LoginComp from '../components/LoginComp.jsx';
 
 import { fetchTopTracks, fetchTopArtists, setChosenTrack } from '../features/slice.js';
@@ -22,13 +23,14 @@ export function App() {
   return (
     <>
       <LoginComp/>
-      {/* <LogStateComp/>
+      {/* {/* <LogStateComp/>
       <NavbarComp/>
       <YearSliderComp/>
       <TopTracksComp/>
       <TopArtistsComp/>
       <TopAlbumComp/>
       <GraphComp/> */}
+      <SignupComp/>
     </>
   )
 }

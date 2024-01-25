@@ -530,3 +530,30 @@ background: rgb(0, 133, 255);
   }
 }
 
+/* ITERATION STYLES */
+.authenticationPage--container {
+  margin-top: 20%;
+}
+
+.authenticationComp--container {
+  border: 1px solid white;
+  width: 330px;
+}
+
+.authenticationComp--container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.authenticationComp--container input {
+  margin-bottom: 10px;
+}
+
+.btn--container {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn {
+  border-radius: 100px;
+}
