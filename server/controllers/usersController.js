@@ -34,3 +34,5 @@ usersController.authUser = async () => {
     })
   }
 }
+
+export default usersController;
