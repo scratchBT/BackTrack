@@ -125,6 +125,18 @@ const models = {
     .from('tracks')
     .select('album_name, image_url')
     .in('album_name', albumNameArray)
+  ),
+
+  authUser: (email) => executeQuery(() => supabase
+    .from('users')
+    .select('*')
+    .eq('email', email)
+    .single()
+  ),
+
+  createUser: (email, password, name) => executeQuery(() => supabase
+    .from('users')
+    .insert([{email, password, name}])
   )
 
   // Old query to get Top10TracksForYear. Does not use views.
