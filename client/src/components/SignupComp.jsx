@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const SignupComp = () => {
     return (
@@ -19,7 +20,8 @@ const SignupComp = () => {
                 <button className='btn'>Sign up with Google</button>
                 <button className='btn'>Sign up with Facebook</button>
             </div>
-            <p>Already have an account? <a>Log in here</a>.</p>
+            {/* <p>Already have an account? <a>Log in here</a>.</p> */}
+            <p>Already have an account? <Link to="/">Log in here</Link>.</p>
         </div>
       </div>
     )
